@@ -24,4 +24,17 @@ public class Pixel {
     public String toString() {
         return color.toString();
     }
+
+    public Color changeColor(Color color) {
+        Color previousColor = this.color;
+        this.color = color;
+        return previousColor;
+    } // changeColor
+
+    public int changeTransparency(int transparency) {
+        int previousTransparency = this.transparency;
+        this.transparency = transparency;
+        return previousTransparency;
+    } // changeTransparency
+
 }
