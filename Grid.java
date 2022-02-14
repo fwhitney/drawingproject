@@ -25,6 +25,14 @@ public class Grid {
         }
     }
 
+    public Pixel[][] getGrid() {
+        return drawingGrid;
+    }
+
+    public Pixel getPixel(int xPosition, int yPosition) {
+        return drawingGrid[yPosition][xPosition];
+    }
+
     public void print() {
         for (Pixel[] x : drawingGrid) {
             for (Pixel y : x) {

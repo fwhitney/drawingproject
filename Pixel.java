@@ -37,4 +37,16 @@ public class Pixel {
         return previousTransparency;
     } // changeTransparency
 
+    public Color getColor() {
+        return color;
+    }
+
+    public int getTransparency() {
+        return transparency;
+    }
+
+    public void changeGroupID(int newGroupID) {
+        this.groupID = newGroupID;
+    }
+
 }

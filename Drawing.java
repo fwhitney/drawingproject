@@ -5,14 +5,14 @@ public class Drawing {
     int width;
     int height;
     State state;
+    // int totalGroups;
 
     public Drawing(int width, int height) {
         this.width = width;
         this.height = height;
 
         this.layers = new ArrayList<>();
-        layers.add(new Grid(height, width, false));
-
+        layers.add(new Grid(height, width, false)); // should I do this?
     }
 
     public void newLayer() {
@@ -20,6 +20,9 @@ public class Drawing {
     }
 
     public void doAction() {
+    }
 
+    public ArrayList<Grid> getLayers() {
+        return layers;
     }
 }
