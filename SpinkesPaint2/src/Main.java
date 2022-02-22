@@ -221,18 +221,6 @@ public class Main extends JPanel {
         panel.add(toolbutton);
         toolbutton.setBackground(Color.white);
 
-        Icon zoomin = new ImageIcon("assets/zoomin.png");
-        JButton zoominbutton = new JButton(zoomin);
-        zoominbutton.setBounds(55, 600, 30, 25);
-        panel.add(zoominbutton);
-        zoominbutton.setBackground(Color.white);
-
-        Icon zoomout = new ImageIcon("assets/zoomout.png");
-        JButton zoomoutbutton = new JButton(zoomout);
-        zoomoutbutton.setBounds(55, 630, 30, 25);
-        panel.add(zoomoutbutton);
-        zoomoutbutton.setBackground(Color.white);
-
         Icon brush = new ImageIcon("assets/brush.png");
         JButton brushbutton = new JButton(brush);
         brushbutton.setBounds(110, 30, 60, 45);
@@ -257,11 +245,23 @@ public class Main extends JPanel {
         panel.add(circlebutton);
         circlebutton.setBackground(Color.white);
 
-        Icon text = new ImageIcon("assets/text.png");
-        JButton textbutton = new JButton(text);
-        textbutton.setBounds(565, 30, 60, 45);
-        panel.add(textbutton);
-        textbutton.setBackground(Color.white);
+        Icon text = new ImageIcon("assets/rotate.png");
+        JButton rotatebutton = new JButton(text);
+        rotatebutton.setBounds(565, 30, 60, 45);
+        panel.add(rotatebutton);
+        rotatebutton.setBackground(Color.white);
+
+        Icon duplicate = new ImageIcon("assets/duplicate.png");
+        JButton duplicatebutton = new JButton(duplicate);
+        duplicatebutton.setBounds(640, 30, 60, 45);
+        panel.add(duplicatebutton);
+        duplicatebutton.setBackground(Color.white);
+
+        Icon group = new ImageIcon("assets/group.png");
+        JButton groupbutton = new JButton(group);
+        groupbutton.setBounds(715, 30, 60, 45);
+        panel.add(groupbutton);
+        groupbutton.setBackground(Color.white);
 
         Icon save = new ImageIcon("assets/save.png");
         JButton savebutton = new JButton(save);
@@ -280,6 +280,12 @@ public class Main extends JPanel {
         openbutton.setBounds(35, 210, 60, 45);
         panel.add(openbutton);
         openbutton.setBackground(Color.white);
+
+        Icon share = new ImageIcon("assets/share.png");
+        JButton sharebutton = new JButton(share);
+        sharebutton.setBounds(35, 270, 60, 45);
+        panel.add(sharebutton);
+        sharebutton.setBackground(Color.white);
 
         JButton redButton = new JButton("");
         redButton.setBounds(cpx, 30, 20, 20);
@@ -491,7 +497,7 @@ public class Main extends JPanel {
 
         spraybutton.addActionListener(e -> toolStateMessage.updateText("Tool Selected: Spray Tool"));
 
-        textbutton.addActionListener(e -> toolStateMessage.updateText("Tool Selected: Text Tool"));
+        rotatebutton.addActionListener(e -> toolStateMessage.updateText("Tool Selected: Rotate Tool"));
 
         squarebutton.addActionListener(e -> {
             toolStateMessage.updateText("Tool Selected: Rectangle Tool");
