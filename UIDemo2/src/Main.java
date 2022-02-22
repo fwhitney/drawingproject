@@ -223,6 +223,7 @@ public class Main {
         circlebutton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 toolStateMessage.updateText("Tool Selected: Circle Tool");
+                
             }
         });
 
