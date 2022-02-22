@@ -65,79 +65,7 @@ public class Main extends JPanel {
         }
     }
 
-    public static void setup(){
-        JFrame frame = new JFrame("Welcome!");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        JPanel panel = new JPanel();
-        panel.setLayout(null);
-        panel.setBackground(new Color(230, 230, 230));
-        panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
-        frame.pack();
-        frame.setSize(475, 650);
 
-        JLabel textLabel = new JLabel("Welcome to Sprinkles Paint!");
-        textLabel.setBounds(150, 3, 1000, 15);
-        panel.add(textLabel);
-
-        JLabel sizeLabel = new JLabel("Please select a size below:");
-        sizeLabel.setBounds(150, 330, 1000, 15);
-        panel.add(sizeLabel);
-
-        Icon logo = new ImageIcon("logo.png");
-        JLabel logoLabel = new JLabel(logo);
-        logoLabel.setBorder(BorderFactory.createLineBorder(Color.black, 1));
-        panel.add(logoLabel);
-        logoLabel.setBounds(85, 20, 300, 300);
-
-        Icon instagram = new ImageIcon("instagram.png");
-        JLabel instagramLabel = new JLabel(instagram);
-        instagramLabel.setBorder(BorderFactory.createLineBorder(Color.gray, 4));
-        panel.add(instagramLabel);
-        instagramLabel.setBounds(20, 360, 120, 120);
-
-        Icon paper = new ImageIcon("a4.png");
-        JLabel paperLabel = new JLabel(paper);
-        paperLabel.setBorder(BorderFactory.createLineBorder(Color.gray, 4));
-        panel.add(paperLabel);
-        paperLabel.setBounds(180, 360, 100, 120);
-
-        Icon widescreen = new ImageIcon("widescreen.png");
-        JLabel widescreenLabel = new JLabel(widescreen);
-        widescreenLabel.setBorder(BorderFactory.createLineBorder(Color.gray, 4));
-        panel.add(widescreenLabel);
-
-        widescreenLabel.setBounds(330, 390, 100, 60);
-
-        JButton instagrambutton = new JButton("Instagram");
-        instagrambutton.setBounds(20, 520, 120, 45);
-        panel.add(instagrambutton);
-        instagrambutton.setBackground(Color.white);
-
-        JButton paperbutton = new JButton("A4 Paper");
-        paperbutton.setBounds(170, 520, 120, 45);
-        panel.add(paperbutton);
-        paperbutton.setBackground(Color.white);
-
-        JButton widescreenbutton = new JButton("Widescreen");
-        widescreenbutton.setBounds(320, 520, 120, 45);
-        panel.add(widescreenbutton);
-        widescreenbutton.setBackground(Color.white);
-
-        instagrambutton.addActionListener(e -> {
-            frame.setVisible(false);
-        });
-
-        paperbutton.addActionListener(e -> {
-            frame.setVisible(false);
-        });
-
-        widescreenbutton.addActionListener(e -> {
-            frame.setVisible(false);
-        });
-
-        frame.add(panel);
-        frame.setVisible(true);
-    }
 
     public void createShape(Graphics2D g, String shape, int x, int y) {
         int x1 = x - (shapeWidth / 2);
@@ -165,22 +93,93 @@ public class Main extends JPanel {
     }
 
     public static void main(String[] args) {
-        // Title Button X Offset.
-        int cpx = 410;
-        setup();
-        // Brush State for applying pixels.
-
         // JFrame and JPanel stuff.
         JFrame frame = new JFrame("Sprinkles Paint Demo");
         JPanel panel = new JPanel();
         Main drawingPanel = new Main();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+        JFrame initialframe = new JFrame("Welcome!");
+        initialframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        JPanel initialpanel = new JPanel();
+        initialpanel.setLayout(null);
+        initialpanel.setBackground(new Color(230, 230, 230));
+        initialpanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        initialframe.pack();
+        initialframe.setSize(475, 650);
+
+        JLabel textLabel = new JLabel("Welcome to Sprinkles Paint!");
+        textLabel.setBounds(150, 3, 1000, 15);
+        initialpanel.add(textLabel);
+
+        JLabel sizeLabel = new JLabel("Please select a size below:");
+        sizeLabel.setBounds(150, 330, 1000, 15);
+        initialpanel.add(sizeLabel);
+
+        Icon logo = new ImageIcon("logo.png");
+        JLabel logoLabel = new JLabel(logo);
+        logoLabel.setBorder(BorderFactory.createLineBorder(Color.black, 1));
+        initialpanel.add(logoLabel);
+        logoLabel.setBounds(85, 20, 300, 300);
+
+        Icon instagram = new ImageIcon("instagram.png");
+        JLabel instagramLabel = new JLabel(instagram);
+        instagramLabel.setBorder(BorderFactory.createLineBorder(Color.gray, 4));
+        initialpanel.add(instagramLabel);
+        instagramLabel.setBounds(20, 360, 120, 120);
+
+        Icon paper = new ImageIcon("a4.png");
+        JLabel paperLabel = new JLabel(paper);
+        paperLabel.setBorder(BorderFactory.createLineBorder(Color.gray, 4));
+        initialpanel.add(paperLabel);
+        paperLabel.setBounds(180, 360, 100, 120);
+
+        Icon widescreen = new ImageIcon("widescreen.png");
+        JLabel widescreenLabel = new JLabel(widescreen);
+        widescreenLabel.setBorder(BorderFactory.createLineBorder(Color.gray, 4));
+        initialpanel.add(widescreenLabel);
+
+        widescreenLabel.setBounds(330, 390, 100, 60);
+
+        JButton instagrambutton = new JButton("Instagram");
+        instagrambutton.setBounds(20, 520, 120, 45);
+        initialpanel.add(instagrambutton);
+        instagrambutton.setBackground(Color.white);
+
+        JButton paperbutton = new JButton("A4 Paper");
+        paperbutton.setBounds(170, 520, 120, 45);
+        initialpanel.add(paperbutton);
+        paperbutton.setBackground(Color.white);
+
+        JButton widescreenbutton = new JButton("Widescreen");
+        widescreenbutton.setBounds(320, 520, 120, 45);
+        initialpanel.add(widescreenbutton);
+        widescreenbutton.setBackground(Color.white);
+
+        instagrambutton.addActionListener(e -> {
+            initialframe.setVisible(false);
+            frame.setVisible(true);
+        });
+
+        paperbutton.addActionListener(e -> {
+            initialframe.setVisible(false);
+            frame.setVisible(true);
+        });
+
+        widescreenbutton.addActionListener(e -> {
+            initialframe.setVisible(false);
+            frame.setVisible(true);
+        });
+
+        initialframe.add(initialpanel);
+        initialframe.setVisible(true);
+        // Title Button X Offset.
+        int cpx = 410;
+
         // Set layouts to null, allows for virtually any button location placement.
         panel.setLayout(null);
         panel.setBackground(new Color(220, 220, 220));
         drawingPanel.setLayout(null);
-
 
         frame.getContentPane();
         panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
@@ -305,9 +304,9 @@ public class Main extends JPanel {
             savepanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
             savepanel.add(savepath);
 
-            JLabel textLabel = new JLabel("Type the name of the file you want to save:");
-            textLabel.setBounds(10, 7, 1000, 15);
-            savepanel.add(textLabel);
+            JLabel savetextLabel = new JLabel("Type the name of the file you want to save:");
+            savetextLabel.setBounds(10, 7, 1000, 15);
+            savepanel.add(savetextLabel);
 
             saveframe.pack();
             saveframe.setSize(350, 135);
@@ -339,9 +338,9 @@ public class Main extends JPanel {
             savepanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
             savepanel.add(savepath);
 
-            JLabel textLabel = new JLabel("Type the full path of the file you want to open:");
-            textLabel.setBounds(10, 7, 1000, 15);
-            savepanel.add(textLabel);
+            JLabel savetextLabel = new JLabel("Type the full path of the file you want to open:");
+            savetextLabel.setBounds(10, 7, 1000, 15);
+            savepanel.add(savetextLabel);
 
             saveframe.pack();
             saveframe.setSize(350, 135);
@@ -507,7 +506,7 @@ public class Main extends JPanel {
         frame.pack();
         frame.setJMenuBar(menuBar);
         frame.setSize(1024, 768);
-        frame.setVisible(true);
+        frame.setVisible(false);
 
     }
 
