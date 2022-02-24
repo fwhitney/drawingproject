@@ -598,7 +598,7 @@ public class D3 extends JPanel {
 
         wandButton.addActionListener(e -> {
             toolStateMessage.updateText("Tool Selected: Wand");
-            drawingPanel.loadImage("jcc.png");
+            drawingPanel.loadImage("assets/jcc.png");
             drawingPanel.eraseEverything();
         });
 
@@ -894,9 +894,9 @@ public class D3 extends JPanel {
             }
         }
 
-         public void mouseReleased(MouseEvent event) {
+        public void mouseReleased(MouseEvent event) {
             removeMouseMotionListener(this);
-         }
+        }
     } // MouseHandler
 
     private static class TextPanel extends JPanel {
@@ -977,5 +977,3 @@ public class D3 extends JPanel {
         }
     }
 }
-
-
