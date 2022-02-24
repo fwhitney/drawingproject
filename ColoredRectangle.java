@@ -1,5 +1,8 @@
 import java.awt.*;
 
+/**
+ * Think a rectangle, but you can move it and color it!!
+ */
 public class ColoredRectangle extends Rectangle implements MovableShape {
     Color color;
 
@@ -11,6 +14,12 @@ public class ColoredRectangle extends Rectangle implements MovableShape {
         this.color = color;
     }
 
+    /**
+     * getColor
+     *
+     * Getter method for getting the ColoredRectangle's color.
+     * @return Color: The current color of the rectangle.
+     */
     public Color getColor() {
         return color;
     }
@@ -19,6 +28,12 @@ public class ColoredRectangle extends Rectangle implements MovableShape {
         this.x = x;
         this.y = y;
     }
+
+    /**
+     *
+     * @param x
+     * @param y
+     */
     public void moveShape(double x, double y) {
         this.x = (int) x;
         this.y = (int) y;

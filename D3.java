@@ -1,28 +1,22 @@
 import javax.imageio.ImageIO;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
+import java.awt.datatransfer.Transferable;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.awt.datatransfer.*;
+
 
 // ferris
-
-import javax.swing.*;
-
-import java.awt.Dimension;
-import java.awt.event.*;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-
-import javax.swing.ImageIcon;
-import java.awt.Graphics;
 
 /**
  * Credit to David J. Eck for creating, "Introduction to Computer Graphics"
@@ -32,6 +26,20 @@ import java.awt.Graphics;
  * how to use graphics2D, java.awt, and swing.
  * https://math.hws.edu/graphicsbook/c2/s5.html
  *
+ * Various resources:
+ * https://docs.oracle.com/javase/tutorial/2d/advanced/user.html
+ * https://docs.oracle.com/javase/tutorial/uiswing/painting/index.html
+ * https://docs.oracle.com/javase/7/docs/api/java/awt/event/MouseAdapter.html
+ * https://coderanch.com/t/338230/java/Painting-dissappears-resizing-mouse
+ * https://www.oracle.com/java/technologies/painting.html
+ * https://community.oracle.com/tech/developers/discussion/3770725/select-java-graphic-and-drag-them
+ * https://docs.oracle.com/javase/tutorial/2d/geometry/strokeandfill.html
+ * https://docs.oracle.com/javase/7/docs/api/java/awt/Polygon.html
+ * https://docs.oracle.com/javase/8/docs/api/java/awt/Shape.html
+ * https://stackoverflow.com/questions/35507152/java-graphics2d-drawing-into-bufferedimage
+ *
+ *
+ *
  * TODO: REMOVE THE COLOREDSHAPEWRAPPER
  * TODO: ACTUAL MAGIC WAND
  *
@@ -39,26 +47,23 @@ import java.awt.Graphics;
 
 
 public class D3 extends JPanel {
-    String state = "pen";
-    Color currentColor;
+    private String state = "pencil";
+    private Color currentColor;
 
-    int shapeWidth = 50;
-    int shapeLength = 50;
-    int strokeWidth = 10;
+    private int shapeWidth = 50;
+    private int shapeLength = 50;
+    private int strokeWidth = 10;
 
-    BufferedImage bufferedImage;
+    private BufferedImage bufferedImage;
 
-    Graphics2D graphics;
-    ArrayList<ColoredShapeWrapper> shapes;
-    ArrayList<ColoredShapeWrapper> selection;
-    ArrayList<Line2D> lines;
-    Dimension selectedDimension;
+    private Graphics2D graphics;
+    private final ArrayList<ColoredShapeWrapper> shapes;
+    private final ArrayList<ColoredShapeWrapper> selection;
+    private final ArrayList<Line2DWrapper> lines;
+    private Dimension selectedDimension;
 
-    int clickX;
-    int clickY;
-
-    int clickX2; // used for drawing and dragging movements
-    int clickY2; // ^
+    private int clickX;
+    private int clickY;
 
     public D3(int x, int y) {
         setPreferredSize(null); // Apparently JPanel uses a layout manager and this let's the manager handle things?
@@ -73,6 +78,13 @@ public class D3 extends JPanel {
         this.currentColor = Color.RED;
     }
 
+    /**
+     * paintComponent
+     *
+     * https://docs.oracle.com/javase/tutorial/uiswing/painting/closer.html
+     * Where all the painting occurs.
+     * @param g Graphics: The graphics object.
+     */
     protected void paintComponent(Graphics g) {
         super.paintComponent(g); // wish someone explained why we do this
         graphics = (Graphics2D) g;
@@ -81,10 +93,10 @@ public class D3 extends JPanel {
             graphics.drawImage(bufferedImage, 100, 100, null);
         }
 
-        for (Line2D line : lines) {
-            graphics.setColor(Color.BLACK);
-            graphics.setStroke(new BasicStroke(strokeWidth));
-            graphics.draw(line);
+        for (Line2DWrapper line : lines) {
+            graphics.setColor(line.getColor());
+            graphics.setStroke(line.getStroke());
+            graphics.draw(line.getLine());
         }
 
         for (ColoredShapeWrapper shape : shapes) {
@@ -98,6 +110,13 @@ public class D3 extends JPanel {
         }
     }
 
+    /**
+     * moveShapes
+     *
+     * Takes in a set of X and Y coordinates and moves each selected object by those coordinates.
+     * @param x Integer: Represents the amount we move left or right. (Positive is right, negative is left)
+     * @param y Integer: Represents the amount we move down or up. (Positive is down, negative is up)
+     */
     public void moveShapes(int x, int y) {
         for (ColoredShapeWrapper wrapped : selection) {
             wrapped.getShape().moveShape(x, y);
@@ -105,6 +124,12 @@ public class D3 extends JPanel {
         repaint();
     }
 
+    /**
+     * loadImage
+     *
+     * Loads in an image, and paints it to the canvas.
+     * @param fileName String The full filename of the image we're loading.
+     */
     public void loadImage(String fileName) {
         try {
             bufferedImage = ImageIO.read(new File(fileName));
@@ -116,9 +141,11 @@ public class D3 extends JPanel {
     }
 
     /**
+     * rotateShapes
+     *
      * https://danceswithcode.net/engineeringnotes/rotations_in_2d/rotations_in_2d.htm
      *
-     * Used for rotating shapes, calls the rotateShape method in each individual shape.
+     * Used for rotating shapes, calls the rotate shape method in every shape that was selected.
      */
     public void rotateShapes() {
         MovableShape currentShape;
@@ -128,23 +155,14 @@ public class D3 extends JPanel {
             currentShape.rotateShape();
             System.out.println(currentShape.getX());
             System.out.println(currentShape.getY());
-            /**
-            double x = currentShape.getX();
-            double y = currentShape.getY();
-            System.out.println(x);
-            System.out.println(y);
-            currentShape.moveShape((x*Math.cos(theta) - y*Math.sin(theta)),(x*Math.sin(theta) +y*Math.cos(theta)));
-            System.out.println(currentShape.getX());
-            System.out.println(currentShape.getY());
-             **/
         }
         repaint();
     }
 
     /**
-     * DUPLICATE SHAPES
+     * duplicateShapes
      *
-     * CALLS THE DUPLICATESHAPE METHOD INSIDE EACH OF THE MOVEABLESHAPES
+     * Duplicates every shape that was selected, and places it slightly further away from the original.
      */
     public void duplicateShapes() {
         MovableShape newShape;
@@ -156,11 +174,16 @@ public class D3 extends JPanel {
     }
 
     /**
-     * SELECTION TOOL
-     * SELECTS OBJECTS, AND ADDS THEM TO A CUSTOM LIST WHERE YOU CAN DO STUFF WITH THEM LIKE ROTATE OR DUPLICATE
+     * selectionTool
      *
-     * @param x
-     * @param y
+     * https://docs.oracle.com/javase/tutorial/2d/advanced/user.html
+     * Used for selecting, or deselecting objects. Uses the .contains() method in shapes.
+     *
+     * Checks through the shape or selection list to see if there are any
+     * shapes at the entered coordinates, and if they are they're added to either the selection list, and removed from
+     * the shapes list. For selected objects, it removes them from the selection list, and adds them the shapes list.
+     * @param x Int: The x coordinate that we're checking.
+     * @param y Int: The y coordinate we're checking.
      */
     public void selectionTool(int x, int y) {
         for (int i = selection.size() - 1; i >= 0; i--) {
@@ -178,61 +201,79 @@ public class D3 extends JPanel {
                 System.out.println("Selected a shape");
                 selection.add(shapes.remove(i)); // move it over to rotation
                 return;
-
-                /**
-                 * JUST IN CASE
-                 // selection.add(shapes.remove(i));
-                 boolean notFound = true;
-                 for (ColoredShapeWrapper wrapped : selection) {
-                 if (wrapped.getShape() == current) {
-                 notFound = false;
-                 break;
-                 }
-                 }
-                 if (notFound) {
-                 selection.add(shapes.get(i));
-                 break;
-                 }
-                 **/
             }
         }
-    } // selection tool
+    } // selectionTool
 
-    public void createShape(Graphics2D g, String shape, int x, int y) {
+
+    /**
+     * createShape
+     *
+     * Creates a shape based centered on entered X and Y coordinates, and the string shape that is passed.
+     * TODO: Remove the shape string, as it's a global variable?
+     *
+     * @param shape String: The name of the shape we're building.
+     * @param x Int: The x coordinate that we're centering our shape on.
+     * @param y Int: The y coordinate that we're centering our shape on.
+     */
+    public void createShape(String shape, int x, int y) {
         int x1 = x - (shapeWidth / 2);
         int y1 = y - (shapeLength / 2);
 
         if (shape.equals("rect")) {
-
             shapes.add(new ColoredShapeWrapper(currentColor, new ColoredRectangle(x1, y1, shapeWidth, shapeLength, currentColor)));
-            // colors.add(currentColor);
 
         } else if (shape.equals("circle")) {
-            // Shape circle = new Ellipse2D.Double(x1, y1, shapeWidth, shapeLength, currentColor);
             shapes.add(new ColoredShapeWrapper(currentColor, new ColoredCircle(x1, y1, shapeWidth, shapeLength, currentColor)));
-            // colors.add(currentColor);
         }
         repaint();
-    }
+    } // createShape
 
+    /**
+     * updateState
+     * Updates the state we're currently in. I.E. Pen, Rectangle, etc. Used for determining various mouse actions.
+     *
+     * @param newState String: The new state that we're entering.
+     */
     public void updateState(String newState) {
         this.state = newState;
     }
 
+    /**
+     * updateColor
+     * Updates the color that is being used for drawing or shape creation.
+     * @param newColor Color: The new color that we're using.
+     */
     public void updateColor(Color newColor) {
         this.currentColor = newColor;
     }
 
+    /**
+     * eraseEverything
+     * Erases all drawings from the screen, by removing everything from the shapes, selection, and lines lists.
+     */
     public void eraseEverything() {
+        lines.clear();
         shapes.clear();
         selection.clear();
-        lines.clear();
     }
 
-    public void setStrokeWidth(int strokeWidth) {
-        this.strokeWidth = strokeWidth;
+    /**
+     * setStrokeWidth
+     *
+     * Updates the stroke width, for different pen movements.
+     * @param newStrokeWidth Int: The new width to be used for strokes.
+     */
+    public void setStrokeWidth(int newStrokeWidth) {
+        this.strokeWidth = newStrokeWidth;
     }
 
+    /**
+     * saveImage
+     *
+     * Saves a file as a .png, in the directory wherever the program is saved in.
+     * @param fileName String: The name of the file WITHOUT the extension.
+     */
     public void saveImage(String fileName) {
         BufferedImage img = new BufferedImage(875, 580, BufferedImage.TYPE_INT_RGB);
         fileName = fileName + ".png";
@@ -245,20 +286,59 @@ public class D3 extends JPanel {
             e.printStackTrace();
         }
     }
-    
+
+    /**
+     * toClipboard
+     *
+     * Copies an image to the system clipboard.
+     */
+    public void toClipboard() {
+
+        BufferedImage img = new BufferedImage(selectedDimension.width, selectedDimension.height, BufferedImage.TYPE_INT_RGB);
+        paintComponent(img.createGraphics());
+
+        ClipboardImage ci = new ClipboardImage();
+        ci.copyImage(img);
+    }
+
+    /**
+     * setSelectedDimension
+     *
+     * Setter method for getting the selectedDimension, which represents the canvas size.
+     * Not sure if saying setter method / getter method is better than just a description? Feels kinda obvious?
+     * @param x Int: The width of the current selectedDimension.
+     * @param y Int: The height of the current selectedDimension.
+     */
     public void setSelectedDimension(int x, int y) {
         this.selectedDimension = new Dimension(x, y);
     }
 
+    /**
+     * getSelectedDimension
+     *
+     * Getter method for the selectedDimension.
+     * @return Returns the selected dimension.
+     */
     public Dimension getSelectedDimension() {
         return this.selectedDimension;
     }
 
+    /**
+     * setShapeDimensions
+     *
+     * Used for setting the width and length of newly created shapes.
+     *
+     * @param width Int: The width for newly created shapes.
+     * @param length Int: The length for newly created shapes.
+     */
     public void setShapeDimensions(int width, int length) {
         this.shapeWidth = width;
         this.shapeLength = length;
     }
 
+    /**
+     * I am sorry.
+     */
     public static void main(String[] args) {
         // JFrame and JPanel stuff.
         JFrame frame = new JFrame("Sprinkles Paint Demo");
@@ -301,7 +381,7 @@ public class D3 extends JPanel {
         initialpanel.add(paperLabel);
         paperLabel.setBounds(180, 360, 100, 120);
 
-        Icon widescreen = new ImageIcon("widescreen.png");
+        Icon widescreen = new ImageIcon("assets/widescreen.png");
         JLabel widescreenLabel = new JLabel(widescreen);
         widescreenLabel.setBorder(BorderFactory.createLineBorder(Color.gray, 4));
         initialpanel.add(widescreenLabel);
@@ -325,21 +405,23 @@ public class D3 extends JPanel {
 
         instagramButton.addActionListener(e -> {
             initialframe.setVisible(false);
-            // https://www.adobe.com/express/discover/sizes/instagram
-
-            drawingPanel.setSelectedDimension(1080, 1080);
             frame.setVisible(true);
+            drawingPanel.setSelectedDimension(750, 750);
+            drawingPanel.setSize(drawingPanel.getSelectedDimension());
         });
 
         paperButton.addActionListener(e -> {
             initialframe.setVisible(false);
             frame.setVisible(true);
-            drawingPanel.setSelectedDimension(250, 250);
+            drawingPanel.setSelectedDimension(500, 500);
+            drawingPanel.setSize(drawingPanel.getSelectedDimension());
         });
 
         wideScreenButton.addActionListener(e -> {
             initialframe.setVisible(false);
             frame.setVisible(true);
+            drawingPanel.setSelectedDimension(1000, 1000);
+            drawingPanel.setSize(drawingPanel.getSelectedDimension());
         });
 
         /**
@@ -374,7 +456,7 @@ public class D3 extends JPanel {
         frame.getContentPane();
         panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
 
-        drawingPanel.setBorder(BorderFactory.createBevelBorder(0, Color.darkGray, Color.lightGray));
+        drawingPanel.setBorder(BorderFactory.createEmptyBorder());
         drawingPanel.setSize(drawingPanel.getSelectedDimension());
         drawingPanel.setVisible(true);
         drawingPanel.setLocation(110,100);
@@ -429,22 +511,35 @@ public class D3 extends JPanel {
                     JOptionPane.showMessageDialog(frame, "Invalid input. \nTry entering that again!", "Invalid Number", JOptionPane.ERROR_MESSAGE);
                 }
             }
-            drawingPanel.updateState("pen");
+            drawingPanel.updateState("pencil");
 
 
         });
 
         Icon brush = new ImageIcon("assets/brush.png");
-        JButton brushbutton = new JButton(brush);
-        brushbutton.setBounds(110, 30, 60, 45);
-        panel.add(brushbutton);
-        brushbutton.setBackground(Color.white);
+        JButton brushButton = new JButton(brush);
+        brushButton.setBounds(110, 30, 60, 45);
+        panel.add(brushButton);
+        brushButton.setBackground(Color.white);
 
-        Icon spray = new ImageIcon("assets/spray.png");
-        JButton spraybutton = new JButton(spray);
-        spraybutton.setBounds(185, 30, 60, 45);
-        panel.add(spraybutton);
-        spraybutton.setBackground(Color.white);
+        brushButton.addActionListener(e -> {
+            drawingPanel.updateState("brush");
+            boolean selectionComplete = false;
+            // https://docs.oracle.com/javase/tutorial/uiswing/components/dialog.html#input
+            while (!selectionComplete) {
+                String widthSelection = JOptionPane.showInputDialog(frame, "Please enter the width of the brush in pixels (as a number):", null);
+
+                try {
+                    int width = Integer.parseInt(widthSelection);
+
+                    drawingPanel.setStrokeWidth(width);
+                    selectionComplete = true;
+
+                } catch(NumberFormatException exception) {
+                    JOptionPane.showMessageDialog(frame, "Invalid input. \nTry entering that again!", "Invalid Number", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
 
         Icon square = new ImageIcon("assets/square.png");
         JButton squarebutton = new JButton(square);
@@ -479,19 +574,6 @@ public class D3 extends JPanel {
             toolStateMessage.updateText("Selection duplicated");
             drawingPanel.duplicateShapes();
         });
-        /**
-        Icon moveShape = new ImageIcon("assets/duplicate.png");
-        JButton moveShapeButton = new JButton(moveShape);
-        moveShapeButton.setBounds(640, 30, 60, 45);
-        panel.add(moveShapeButton);
-        moveShapeButton.setBackground(Color.white);
-
-        moveShapeButton.addActionListener(e -> {
-            toolStateMessage.updateText("Selection moved");
-            drawingPanel.moveShapes(25, 25);
-        });
-         **/
-
 
         Icon group = new ImageIcon("assets/group.png");
         JButton groupButton = new JButton(group);
@@ -518,7 +600,7 @@ public class D3 extends JPanel {
 
         wandButton.addActionListener(e -> {
             toolStateMessage.updateText("Tool Selected: Wand");
-            drawingPanel.loadImage("jcc11y.png");
+            drawingPanel.loadImage("jcc.png");
             drawingPanel.eraseEverything();
         });
 
@@ -529,10 +611,15 @@ public class D3 extends JPanel {
         openbutton.setBackground(Color.white);
 
         Icon share = new ImageIcon("assets/share.png");
-        JButton sharebutton = new JButton(share);
-        sharebutton.setBounds(35, 270, 60, 45);
-        panel.add(sharebutton);
-        sharebutton.setBackground(Color.white);
+        JButton shareButton = new JButton(share);
+        shareButton.setBounds(185, 30, 60, 45);
+        panel.add(shareButton);
+        shareButton.setBackground(Color.white);
+
+        shareButton.addActionListener(e -> {
+            toolStateMessage.updateText("Copied to your clipboard");
+            drawingPanel.toClipboard();
+        });
 
         JButton redButton = new JButton("");
         redButton.setBounds(cpx, 30, 20, 20);
@@ -545,73 +632,18 @@ public class D3 extends JPanel {
         });
 
         saveButton.addActionListener(e -> {
-            JFrame saveFrame = new JFrame("Save As...");
-            saveFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-            JPanel savePanel = new JPanel();
-
-            JTextField savePath = new JTextField(1);
-            savePath.setBounds(10, 30,300,20);
-
-            savePanel.setLayout(null);
-            savePanel.setBackground(new Color(230, 230, 230));
-            savePanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
-            savePanel.add(savePath);
-
-            JLabel saveLabel = new JLabel("Type the name of the file you want to save:");
-            saveLabel.setBounds(10, 7, 1000, 15);
-            savePanel.add(saveLabel);
-
-            saveFrame.pack();
-            saveFrame.setSize(350, 135);
-
-            JButton savePathButton = new JButton("Save!");
-            savePathButton.setBounds(10, 55, 100, 20);
-            savePanel.add(savePathButton);
-            savePathButton.setBackground(Color.white);
-
-            savePathButton.addActionListener(a -> {
-                // Filename below:
-                String saveFileName = savePath.getText();
-                drawingPanel.saveImage(saveFileName);
-                saveFrame.setVisible(false);
-                JOptionPane.showMessageDialog(frame,"Image saved as \"" +saveFileName+".png\"");
-            });
-            saveFrame.add(savePanel);
-            saveFrame.setVisible(true);
+            String fileName = JOptionPane.showInputDialog(frame,
+                    "Please enter the name you want to save your beautiful drawing:", null);
+            drawingPanel.saveImage(fileName);
+            toolStateMessage.updateText("Image saved!");
         });
 
         openbutton.addActionListener(e -> {
-            JFrame loadFrame = new JFrame("Load File...");
-            loadFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-            JPanel loadPanel = new JPanel();
-
-            JTextField savepath = new JTextField(1);
-            savepath.setBounds(10, 30,300,20);
-
-            loadPanel.setLayout(null);
-            loadPanel.setBackground(new Color(230, 230, 230));
-            loadPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
-            loadPanel.add(savepath);
-
-            JLabel savetextLabel = new JLabel("Type the full path of the file you want to open:");
-            savetextLabel.setBounds(10, 7, 1000, 15);
-            loadPanel.add(savetextLabel);
-
-            loadFrame.pack();
-            loadFrame.setSize(350, 135);
-
-            JButton savePathButton = new JButton("Open File...");
-            savePathButton.setBounds(10, 55, 100, 20);
-            loadPanel.add(savePathButton);
-            savePathButton.setBackground(Color.white);
-
-            savePathButton.addActionListener(a -> {
-                // Filename below:
-                String filename = savepath.getText();
-                loadFrame.setVisible(false);
-            });
-            loadFrame.add(loadPanel);
-            loadFrame.setVisible(true);
+            // https://docs.oracle.com/javase/tutorial/uiswing/components/dialog.html
+            String fileName = JOptionPane.showInputDialog(frame,
+                    "Please enter the name and extension i.e. .png, .jpg, etc. of the image you want to open:",
+                    null);
+            drawingPanel.loadImage(fileName);
         });
 
         JButton orangeButton = new JButton("");
@@ -740,10 +772,6 @@ public class D3 extends JPanel {
          *
          */
 
-        brushbutton.addActionListener(e -> toolStateMessage.updateText("Tool Selected: Brush Tool"));
-
-        spraybutton.addActionListener(e -> toolStateMessage.updateText("Tool Selected: Spray Tool"));
-
         squarebutton.addActionListener(e -> {
             toolStateMessage.updateText("Tool Selected: Rectangle Tool");
 
@@ -788,6 +816,19 @@ public class D3 extends JPanel {
             drawingPanel.updateState("circle");
         });
 
+        Icon move = new ImageIcon("assets/move.png");
+        JButton moveButton = new JButton(move);
+        moveButton.setBounds(790, 30, 60, 45);
+        panel.add(moveButton);
+        moveButton.setBackground(Color.white);
+
+        moveButton.addActionListener(e -> {
+            toolStateMessage.updateText("Selection moved");
+            drawingPanel.updateState("move");
+        });
+
+
+
         frame.pack();
         frame.setJMenuBar(menuBar);
         frame.setSize(1024, 768);
@@ -819,9 +860,11 @@ public class D3 extends JPanel {
             clickY = event.getY();
             // Adds a MouseMotionListener, so we can track where we are going.
             if (state.equals("rect") || state.equals("circle")) {
-                createShape(graphics, state, clickX, clickY);
+                createShape(state, clickX, clickY);
             } else if (state.equals("select")) {
                 selectionTool(clickX, clickY);
+            } else if (state.equals("move")) {
+                moveShapes(clickX, clickY);
             } else {
                 addMouseMotionListener(this);
             }
@@ -835,12 +878,21 @@ public class D3 extends JPanel {
          **/
 
         public void mouseDragged(MouseEvent event) {
-            if (state.equals("pen")) {
+            if (state.equals("pencil") || state.equals("brush")) {
                 clickX = event.getX();
                 clickY = event.getY();
-                clickX2 = clickX;
-                clickY2 = clickY;
-                lines.add(new Line2D.Double(clickX, clickY, clickX2, clickY2));
+                // used for drawing and dragging movements
+                int clickX2 = clickX;
+                // ^
+                int clickY2 = clickY;
+                if (state.equals("pencil")) {
+                    lines.add(new Line2DWrapper(new Line2D.Double(clickX, clickY, clickX2, clickY2),
+                            currentColor, new BasicStroke(strokeWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)));
+                } else if (state.equals("brush")) {
+                    System.out.println("test");
+                    lines.add(new Line2DWrapper(new Line2D.Double(clickX, clickY, clickX2, clickY2),
+                            currentColor, new BasicStroke(strokeWidth, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL)));
+                }
                 repaint();
             }
         }
@@ -851,7 +903,6 @@ public class D3 extends JPanel {
     } // MouseHandler
 
     private static class TextPanel extends JPanel {
-        private Graphics graphics;
 
         public TextPanel() {
         }
@@ -861,12 +912,71 @@ public class D3 extends JPanel {
         }
 
         public void updateText(String text){
-            graphics = getGraphics();
+            Graphics graphics = getGraphics();
             graphics.setColor(Color.white);
             graphics.fillRect(0,0,700,20);
             graphics.setColor(Color.black);
             graphics.drawString(text, 12, 12);
 
+        }
+    }
+
+    /**
+     * COMPLETELY TAKEN FROM:
+     * https://coderanch.com/t/333565/java/BufferedImage-System-Clipboard
+     * and
+     * https://stackoverflow.com/questions/4552045/copy-bufferedimage-to-clipboard
+     */
+    public class ClipboardImage implements ClipboardOwner {
+
+        // https://stackoverflow.com/questions/4552045/copy-bufferedimage-to-clipboard
+        public void copyImage(BufferedImage bi)
+        {
+            TransferableImage trans = new TransferableImage( bi );
+            Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
+            c.setContents( trans, this );
+        }
+
+        public void lostOwnership(Clipboard clip, Transferable trans ) {
+            System.out.println( "Lost Clipboard Ownership" );
+        }
+
+        // https://docs.oracle.com/javase/7/docs/api/javax/activation/DataHandler.html
+        // https://docs.oracle.com/javase/7/docs/api/java/awt/datatransfer/Transferable.html
+        private class TransferableImage implements Transferable {
+
+            Image i;
+
+            public TransferableImage( Image i ) {
+                this.i = i;
+            }
+
+            public Object getTransferData( DataFlavor flavor )
+                    throws UnsupportedFlavorException {
+                if ( flavor.equals( DataFlavor.imageFlavor ) && i != null ) {
+                    return i;
+                }
+                else {
+                    throw new UnsupportedFlavorException( flavor );
+                }
+            }
+
+            public DataFlavor[] getTransferDataFlavors() {
+                DataFlavor[] flavors = new DataFlavor[ 1 ];
+                flavors[ 0 ] = DataFlavor.imageFlavor;
+                return flavors;
+            }
+
+            public boolean isDataFlavorSupported( DataFlavor flavor ) {
+                DataFlavor[] flavors = getTransferDataFlavors();
+                for (DataFlavor dataFlavor : flavors) {
+                    if (flavor.equals(dataFlavor)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
         }
     }
 }

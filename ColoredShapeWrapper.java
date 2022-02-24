@@ -16,10 +16,20 @@ public class ColoredShapeWrapper {
         this.shape = shape;
     }
 
+    /**
+     * getColor:
+     * Getter method for getting the current color of the shape.
+     * @return Color: The color of the line.
+     */
     public Color getColor() {
         return color;
     }
 
+    /**
+     * getShape:
+     * Getter method for getting the current shape.
+     * @return Shape: The shape object.
+     */
     public MovableShape getShape() {
         return shape;
     }
