@@ -16,8 +16,6 @@ import java.util.ArrayList;
 import java.awt.datatransfer.*;
 
 
-// ferris
-
 /**
  * Credit to David J. Eck for creating, "Introduction to Computer Graphics"
  * https://math.hws.edu/graphicsbook/index.html
@@ -341,7 +339,7 @@ public class D3 extends JPanel {
      */
     public static void main(String[] args) {
         // JFrame and JPanel stuff.
-        JFrame frame = new JFrame("Sprinkles Paint Demo");
+        JFrame frame = new JFrame("Sprinkles Paint FULL VERSION UNREGISTERED HYPERCAM");
         JPanel panel = new JPanel();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         D3 drawingPanel = new D3(800, 800);
