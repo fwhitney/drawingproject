@@ -887,7 +887,6 @@ public class D3 extends JPanel {
                     lines.add(new Line2DWrapper(new Line2D.Double(clickX, clickY, clickX2, clickY2),
                             currentColor, new BasicStroke(strokeWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)));
                 } else if (state.equals("brush")) {
-                    System.out.println("test");
                     lines.add(new Line2DWrapper(new Line2D.Double(clickX, clickY, clickX2, clickY2),
                             currentColor, new BasicStroke(strokeWidth, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL)));
                 }
